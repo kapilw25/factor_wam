@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FactorWAM · Research Proposal · Wanaskar et al. 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- archival header -->
+<header class="archival-bar">
+  <div class="bar-left">
+    <span class="dot"></span>
+    <span>ARXIV PREPRINT · DRAFT v0.1</span>
+  </div>
+  <div class="bar-center">FACTORWAM · 2026.05.09</div>
+  <div class="bar-right">CVPR / NEURIPS 2027 · TARGET</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-meta">
+    <span class="meta-label">Working Title</span>
+    <span class="meta-id">PROP-2027-01</span>
+  </div>
+
+  <h1 class="hero-title">
+    <span class="title-line-1">World Action Models</span>
+    <span class="title-line-2">as <em>Self-Supervised</em> Reward Signals</span>
+    <span class="title-line-3">for Embodied <span class="amp">RL</span></span>
+  </h1>
+
+  <p class="hero-tagline">
+    A solo-researcher path to robot manipulation rewards — without robots,
+    without teleop, without proprietary VLM judges.
+  </p>
+
+  <div class="hero-authors">
+    <div class="author-block">
+      <span>Kapil Wanaskar<sup>1</sup></span> &nbsp;
+      <span>Gaytri Jena<sup>2</sup></span> &nbsp;
+      <span>Vinija Jain<sup>3</sup></span> &nbsp;
+      <span>Vasu Sharma<sup>5</sup></span> &nbsp;
+      <span>Aman Chadha<sup>4</sup></span> &nbsp;
+      <span>Amitava Das<sup>6</sup></span>
+    </div>
+    <div class="author-affiliations">
+      <sup>1</sup>Canva Research, USA &nbsp;&nbsp;
+      <sup>2</sup>Williams Sonoma Inc., USA &nbsp;&nbsp;
+      <sup>3</sup>Google, USA &nbsp;&nbsp;
+      <sup>4</sup>Google DeepMind, USA &nbsp;&nbsp;
+      <sup>6</sup>Pragya Lab, BITS Pilani Goa, India &nbsp;&nbsp;
+      <sup>5</sup>Pocket FM, USA
+    </div>
+  </div>
+
+  <div class="hero-pills">
+    <span class="pill">🎬 50K-clip dataset</span>
+    <span class="pill">🧠 V-JEPA 2.1 backbone</span>
+    <span class="pill">🎯 Reward without robots</span>
+    <span class="pill">🤖 Real2Sim2Real</span>
+    <span class="pill pill-accent">🏆 Tier-1 target</span>
+  </div>
+
+  <div class="sample-videos sample-videos-hero">
+    <div class="sample-videos-head">
+      <span class="card-label">EgoActionVideo-50K · Sample Source Clips</span>
+      <span class="card-id">YouTube POV · Cooking · Cleaning · Manipulation</span>
+    </div>
+    <div class="video-grid">
+      <a class="video-card" href="https://www.youtube.com/watch?v=xlKRB9DfGsY" target="_blank" rel="noopener">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/xlKRB9DfGsY/hqdefault.jpg" alt="Egocentric cooking POV" loading="lazy" />
+          <div class="play-btn"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5c-2.9.8-4.6 3.3-5.4 6.2C.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z" fill="#212121" fill-opacity=".8"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div>
+        </div>
+        <div class="video-meta"><span class="video-tag tag-cooking">Cooking</span></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=7ECKKEh9tnY" target="_blank" rel="noopener">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/7ECKKEh9tnY/hqdefault.jpg" alt="Egocentric cooking POV" loading="lazy" />
+          <div class="play-btn"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5c-2.9.8-4.6 3.3-5.4 6.2C.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z" fill="#212121" fill-opacity=".8"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div>
+        </div>
+        <div class="video-meta"><span class="video-tag tag-cooking">Cooking</span></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=6mPU9OVrXzQ" target="_blank" rel="noopener">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/6mPU9OVrXzQ/hqdefault.jpg" alt="Egocentric cooking POV" loading="lazy" />
+          <div class="play-btn"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5c-2.9.8-4.6 3.3-5.4 6.2C.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z" fill="#212121" fill-opacity=".8"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div>
+        </div>
+        <div class="video-meta"><span class="video-tag tag-cooking">Cooking</span></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=9sBmAd-csFw" target="_blank" rel="noopener">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/9sBmAd-csFw/hqdefault.jpg" alt="Vacuum cleaning apartment POV" loading="lazy" />
+          <div class="play-btn"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5c-2.9.8-4.6 3.3-5.4 6.2C.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z" fill="#212121" fill-opacity=".8"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div>
+        </div>
+        <div class="video-meta"><span class="video-tag tag-cleaning">Cleaning</span><span class="video-label">Vacuum cleaning apartment</span></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=ar2O3qHOg1k" target="_blank" rel="noopener">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/ar2O3qHOg1k/hqdefault.jpg" alt="Cleaning bedroom POV" loading="lazy" />
+          <div class="play-btn"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5c-2.9.8-4.6 3.3-5.4 6.2C.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z" fill="#212121" fill-opacity=".8"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div>
+        </div>
+        <div class="video-meta"><span class="video-tag tag-cleaning">Cleaning</span><span class="video-label">Cleaning messy bedroom</span></div>
+      </a>
+      <a class="video-card" href="https://www.youtube.com/watch?v=tfCTn-5iudk" target="_blank" rel="noopener">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/tfCTn-5iudk/hqdefault.jpg" alt="Cinematic mopping POV" loading="lazy" />
+          <div class="play-btn"><svg viewBox="0 0 68 48"><path d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5c-2.9.8-4.6 3.3-5.4 6.2C.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z" fill="#212121" fill-opacity=".8"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div>
+        </div>
+        <div class="video-meta"><span class="video-tag tag-cleaning">Cleaning</span><span class="video-label">Cinematic GoPro mopping</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-abstract">
+    <span class="abstract-label">ABSTRACT —</span>
+    Vision-Language-Action models (VLA) are saturating; the field is
+    pivoting to <strong>World Action Models (WAM)</strong>. We propose
+    <strong>FactorWAM</strong>, a self-supervised reward function derived from a
+    video world model's <em>imagined trajectory consistency</em>. By scoring
+    candidate actions through their predicted future-frame outcomes, we obviate the
+    need for proprietary VLM judges, expensive human preferences, or robot
+    teleoperation. We validate on Open-X-Embodiment manipulation benchmarks via
+    DreamDojo-style Real2Sim2Real rollouts and release
+    <strong>EgoActionVideo-50K</strong>, a glove-pose-annotated YouTube corpus
+    designed as a citation-magnet companion artifact.
+  </div>
+</section>
+
+<!-- MOTIVATION -->
+<section class="section section-motivation" id="motivation">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <h2 class="section-title">The Great Parallel</h2>
+    <span class="section-rule"></span>
+  </div>
+
+  <p class="lead">
+    Jim Fan's thesis: the LLM playbook
+    (<em>Pre-Train → SFT → Reasoning RL</em>) maps one-to-one onto the robotics
+    stack (<em>World Modeling → Action Fine-Tuning → Physical RL</em>).
+    Each row is "simulating," "aligning," then "surpassing." Robotics is doing in
+    2026–2028 what language models did in 2022–2024 — but the
+    <em>aligning</em> step has no scalable reward signal yet. That is the gap
+    FactorWAM fills.
+  </p>
+
+  <div class="parallel-grid">
+    <div class="parallel-row">
+      <div class="parallel-cell cell-known">
+        <span class="cell-tag">LLM · Solved</span>
+        <span class="cell-title">Pre-Training</span>
+        <span class="cell-detail">Web-scale text</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="parallel-cell cell-known">
+        <span class="cell-tag">LLM · Solved</span>
+        <span class="cell-title">Supervised FT</span>
+        <span class="cell-detail">Instruction tuning</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="parallel-cell cell-known">
+        <span class="cell-tag">LLM · Solved</span>
+        <span class="cell-title">Reasoning RL</span>
+        <span class="cell-detail">RLHF / GRPO / DPO</span>
+      </div>
+    </div>
+
+    <div class="parallel-row">
+      <div class="parallel-cell cell-emerging">
+        <span class="cell-tag">Robotics · 2024–25</span>
+        <span class="cell-title">World Modeling</span>
+        <span class="cell-detail">V-JEPA, Genie, UniSim</span>
+      </div>
+      <div class="arrow arrow-amber">→</div>
+      <div class="parallel-cell cell-gap">
+        <span class="cell-tag cell-tag-gap">⚡ Gap · 2026</span>
+        <span class="cell-title">Action FT</span>
+        <span class="cell-detail">Where reward signals <em>should</em> live</span>
+      </div>
+      <div class="arrow arrow-amber">→</div>
+      <div class="parallel-cell cell-emerging">
+        <span class="cell-tag">Robotics · 2027+</span>
+        <span class="cell-title">Physical RL</span>
+        <span class="cell-detail">DreamDojo, parallel sims</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="lead lead-small">
+    Existing approaches plug this gap with proprietary VLM judges (GPT-5, Gemini)
+    that are expensive, drift, and produce inflated scores. FactorWAM proposes
+    a self-supervised alternative: <strong>let the world model judge itself</strong>.
+  </p>
+</section>
+
+<!-- METHODOLOGY: 5 STEPS -->
+<section class="section section-method" id="method">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Five-Step Methodology</h2>
+    <span class="section-rule"></span>
+  </div>
+
+  <p class="lead">
+    Each step is a self-contained contribution that can be ablated and published
+    independently if needed. Steps 1–3 are achievable on a single A100; Steps 4–5
+    require modest cloud compute (~$1.5K total).
+  </p>
+
+  <!-- Mermaid: full pipeline -->
+  <div class="mermaid-card">
+    <div class="mermaid-card-head">
+      <span class="card-label">Pipeline Overview</span>
+      <span class="card-id">DIAGRAM 01</span>
+    </div>
+    <div class="mermaid">
+      flowchart LR
+        A[🎬 Step 1<br/>EgoActionVideo-50K<br/>YouTube + glove poses]:::data
+        B[🧠 Step 2<br/>FactorWAM<br/>V-JEPA 2.1 + action latents]:::method
+        C[🎯 Step 3<br/>Trajectory-Consistency<br/>Reward Model R1]:::reward
+        D[🤖 Step 4<br/>Open-X-Embodiment<br/>Policy via R1 + Real2Sim2Real]:::policy
+        E[📄 Step 5<br/>Paper + Release<br/>CVPR / NeurIPS 2027]:::publish
+
+        A --&gt; B --&gt; C --&gt; D --&gt; E
+
+        classDef data fill:#1d2024,stroke:#d4a574,stroke-width:2px,color:#f5f1e8;
+        classDef method fill:#1d2024,stroke:#6b9080,stroke-width:2px,color:#f5f1e8;
+        classDef reward fill:#1d2024,stroke:#c77d49,stroke-width:2px,color:#f5f1e8;
+        classDef policy fill:#1d2024,stroke:#7a8db8,stroke-width:2px,color:#f5f1e8;
+        classDef publish fill:#1d2024,stroke:#b85c5c,stroke-width:2px,color:#f5f1e8;
+    </div>
+  </div>
+
+  <!-- Step 1 -->
+  <article class="step" id="step-1">
+    <div class="step-head">
+      <span class="step-num">01</span>
+      <h3 class="step-title">🎬 Dataset · EgoActionVideo-50K</h3>
+      <span class="step-budget">~$300 · 4 wks</span>
+    </div>
+    <p class="step-summary">
+      Curate 50,000 YouTube clips across cooking, sports, and DIY. Annotate with
+      <em>glove-pose proxies</em> using off-the-shelf hand-pose estimators (no
+      teleop required). Aligns with NVIDIA's <em>Dexterity Scaling Law</em>:
+      cheap glove data &gt; expensive teleop.
+    </p>
+
+    <div class="mermaid-card">
+      <div class="mermaid-card-head">
+        <span class="card-label">Step 1 Detail</span>
+        <span class="card-id">DIAGRAM 02</span>
+      </div>
+      <div class="mermaid">
+        flowchart TB
+          Y[YouTube]:::src
+          Y --&gt; F[Filter:<br/>cooking · sports · DIY]:::proc
+          F --&gt; H[Hand-pose<br/>HaMeR / MediaPipe]:::proc
+          F --&gt; A[Action labels<br/>VideoLLaMA3]:::proc
+          H --&gt; D[(EgoActionVideo-50K<br/>50K clips · HF Hub)]:::out
+          A --&gt; D
+
+          classDef src fill:#0f1114,stroke:#d4a574,color:#f5f1e8;
+          classDef proc fill:#1d2024,stroke:#6b9080,color:#f5f1e8;
+          classDef out fill:#1d2024,stroke:#c77d49,stroke-width:3px,color:#f5f1e8;
+      </div>
+    </div>
+
+  </article>
+
+  <!-- Step 2 -->
+  <article class="step" id="step-2">
+    <div class="step-head">
+      <span class="step-num">02</span>
+      <h3 class="step-title">🧠 Method · FactorWAM Architecture</h3>
+      <span class="step-budget">~$500 · 6 wks</span>
+    </div>
+    <p class="step-summary">
+      Reuse the FactorJEPA encoder (V-JEPA 2.1 ViT-G + motion-aux head, already
+      validated at +13.16 pp action top-1 over frozen baseline). Add an
+      <em>action latent</em> head and a forward dynamics module that predicts
+      next-frame embeddings conditioned on action latents. This is the
+      "Aligning" stage — the highlighted yellow box in Jim Fan's slide.
+    </p>
+
+    <div class="mermaid-card">
+      <div class="mermaid-card-head">
+        <span class="card-label">Step 2 Detail</span>
+        <span class="card-id">DIAGRAM 03</span>
+      </div>
+      <div class="mermaid">
+        flowchart LR
+          V["Video frames\nv_t, v_t+1, ..."]:::input
+          V --&gt; E["FactorJEPA Encoder\nV-JEPA 2.1 ViT-G"]:::encoder
+          E --&gt; Z["z_t embedding"]:::latent
+          Z --&gt; AH["Action Latent Head\np(a_t)"]:::action
+          Z --&gt; FH["Forward Dynamics\nz_t+1 = f(z_t, a_t)"]:::dyn
+          AH --&gt; FH
+          FH --&gt; PRED["Predicted z_t+1"]:::out
+          PRED --&gt; LOSS["Self-supervised loss\n||z_t+1 - pred||"]:::loss
+
+          classDef input fill:#0f1114,stroke:#d4a574,color:#f5f1e8;
+          classDef encoder fill:#1d2024,stroke:#6b9080,stroke-width:3px,color:#f5f1e8;
+          classDef latent fill:#1d2024,stroke:#7a8db8,color:#f5f1e8;
+          classDef action fill:#1d2024,stroke:#c77d49,color:#f5f1e8;
+          classDef dyn fill:#1d2024,stroke:#c77d49,color:#f5f1e8;
+          classDef out fill:#1d2024,stroke:#b85c5c,color:#f5f1e8;
+          classDef loss fill:#0f1114,stroke:#d4a574,stroke-width:2px,color:#f5f1e8;
+      </div>
+    </div>
+  </article>
+
+  <!-- Step 3 -->
+  <article class="step" id="step-3">
+    <div class="step-head">
+      <span class="step-num">03</span>
+      <h3 class="step-title">🎯 R1 Reward Model · Trajectory Consistency</h3>
+      <span class="step-budget">~$200 · 3 wks</span>
+    </div>
+    <p class="step-summary">
+      Score candidate actions by their <em>imagined-trajectory consistency</em>:
+      roll out the world model under action a, measure whether the predicted
+      trajectory reaches the linguistic goal embedding. <strong>No robot, no
+      VLM judge, no preferences.</strong> This is the central novelty.
+    </p>
+
+    <div class="mermaid-card">
+      <div class="mermaid-card-head">
+        <span class="card-label">Step 3 Detail</span>
+        <span class="card-id">DIAGRAM 04</span>
+      </div>
+      <div class="mermaid">
+        flowchart TB
+          S[State z_t<br/>+ goal g]:::input
+          S --&gt; A1[Candidate action a_1]:::cand
+          S --&gt; A2[Candidate action a_2]:::cand
+          S --&gt; AN[Candidate action a_n]:::cand
+
+          A1 --&gt; R1[WAM rollout<br/>z_t → z_t+H]:::rollout
+          A2 --&gt; R2[WAM rollout]:::rollout
+          AN --&gt; RN[WAM rollout]:::rollout
+
+          R1 --&gt; C1[goal-distance<br/>‖z_t+H − g‖]:::score
+          R2 --&gt; C2[goal-distance]:::score
+          RN --&gt; CN[goal-distance]:::score
+
+          C1 --&gt; REW[R1 reward signal<br/>r = −‖z_t+H − g‖]:::out
+          C2 --&gt; REW
+          CN --&gt; REW
+
+          classDef input fill:#0f1114,stroke:#d4a574,color:#f5f1e8;
+          classDef cand fill:#1d2024,stroke:#7a8db8,color:#f5f1e8;
+          classDef rollout fill:#1d2024,stroke:#6b9080,color:#f5f1e8;
+          classDef score fill:#1d2024,stroke:#c77d49,color:#f5f1e8;
+          classDef out fill:#1d2024,stroke:#d4a574,stroke-width:3px,color:#f5f1e8;
+      </div>
+    </div>
+  </article>
+
+  <!-- Step 4 -->
+  <article class="step" id="step-4">
+    <div class="step-head">
+      <span class="step-num">04</span>
+      <h3 class="step-title">🤖 R2 Policy · Real2Sim2Real Training</h3>
+      <span class="step-budget">~$400 · 6 wks</span>
+    </div>
+    <p class="step-summary">
+      Use Open-X-Embodiment public trajectories. Construct DreamDojo-style
+      <em>digital cousins</em> via Isaac Sim / CARLA. Fine-tune OpenVLA or Pi-Zero
+      with our R1 reward via GRPO. Compare against teleop-only baselines and
+      RoboReward-style proprietary judges.
+    </p>
+
+    <div class="mermaid-card">
+      <div class="mermaid-card-head">
+        <span class="card-label">Step 4 Detail</span>
+        <span class="card-id">DIAGRAM 05</span>
+      </div>
+      <div class="mermaid">
+        flowchart LR
+          O[Open-X-Embodiment<br/>real trajectories]:::data
+          O --&gt; DT[Digital Twins<br/>Isaac Sim]:::sim
+          O --&gt; DC[Digital Cousins<br/>scene variants]:::sim
+          DT --&gt; ROLL[Massively parallel<br/>rollouts]:::roll
+          DC --&gt; ROLL
+          ROLL --&gt; R1[R1 reward<br/>from FactorWAM]:::rew
+          R1 --&gt; GRPO[GRPO<br/>policy update]:::rl
+          GRPO --&gt; POL[Policy π<br/>OpenVLA / Pi-Zero]:::pol
+          POL -.feedback.-&gt; ROLL
+
+          classDef data fill:#0f1114,stroke:#d4a574,color:#f5f1e8;
+          classDef sim fill:#1d2024,stroke:#7a8db8,color:#f5f1e8;
+          classDef roll fill:#1d2024,stroke:#6b9080,color:#f5f1e8;
+          classDef rew fill:#1d2024,stroke:#c77d49,stroke-width:3px,color:#f5f1e8;
+          classDef rl fill:#1d2024,stroke:#b85c5c,color:#f5f1e8;
+          classDef pol fill:#1d2024,stroke:#d4a574,color:#f5f1e8;
+      </div>
+    </div>
+
+    <div class="results-table-wrap">
+      <div class="results-table-head">
+        <span class="card-label">Expected Results · Open-X-Embodiment Manipulation</span>
+        <span class="card-id">TABLE 01 · Reward Signal Ablation</span>
+      </div>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Task Success &uarr;</th>
+            <th>Goal Reach &uarr;</th>
+            <th>Reward Corr. &uarr;</th>
+            <th>Sim2Real Gap &darr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OpenVLA <span class="table-note">(no reward)</span></td>
+            <td>32.4<sub>&plusmn;1.2</sub></td>
+            <td>0.41<sub>&plusmn;0.03</sub></td>
+            <td class="table-na">&mdash;</td>
+            <td class="table-na">&mdash;</td>
+          </tr>
+          <tr>
+            <td>OpenVLA + VLM Judge</td>
+            <td>48.7<sub>&plusmn;0.9</sub></td>
+            <td>0.63<sub>&plusmn;0.02</sub></td>
+            <td>0.52<sub>&plusmn;0.04</sub></td>
+            <td>18.3<sub>&plusmn;1.1</sub></td>
+          </tr>
+          <tr>
+            <td>OpenVLA + RoboCLIP</td>
+            <td>44.1<sub>&plusmn;1.1</sub></td>
+            <td>0.58<sub>&plusmn;0.03</sub></td>
+            <td>0.47<sub>&plusmn;0.05</sub></td>
+            <td>21.6<sub>&plusmn;0.9</sub></td>
+          </tr>
+          <tr>
+            <td>OpenVLA + Human Pref.</td>
+            <td>51.2<sub>&plusmn;0.8</sub></td>
+            <td>0.67<sub>&plusmn;0.02</sub></td>
+            <td>0.61<sub>&plusmn;0.03</sub></td>
+            <td>15.7<sub>&plusmn;1.0</sub></td>
+          </tr>
+          <tr class="results-ours">
+            <td><strong>FactorWAM (Ours)</strong></td>
+            <td><strong>55.8</strong><sub>&plusmn;0.7</sub></td>
+            <td><strong>0.72</strong><sub>&plusmn;0.02</sub></td>
+            <td><strong>0.69</strong><sub>&plusmn;0.03</sub></td>
+            <td><strong>12.4</strong><sub>&plusmn;0.8</sub></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="results-caption">
+        Policy backbone fixed (OpenVLA); only the reward signal varies.
+        Task Success = % completed manipulation tasks. Goal Reach = cosine similarity to goal latent.
+        Reward Corr. = Spearman &rho; between reward score and human success rating.
+        Sim2Real Gap = performance drop (%) from sim to real.
+      </div>
+    </div>
+  </article>
+
+  <!-- Step 5 -->
+  <article class="step" id="step-5">
+    <div class="step-head">
+      <span class="step-num">05</span>
+      <h3 class="step-title">📄 Paper, Release &amp; Dissemination</h3>
+      <span class="step-budget">~$100 · 4 wks</span>
+    </div>
+    <p class="step-summary">
+      Frame contribution as filling the "Aligning" gap in Jim Fan's Great
+      Parallel. Release model weights, EgoActionVideo-50K dataset, and
+      evaluation harness on HuggingFace.
+    </p>
+  </article>
+</section>
+
+<!-- LITERATURE TABLE -->
+<section class="section section-lit" id="literature">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Literature Survey · The Uniqueness Argument</h2>
+    <span class="section-rule"></span>
+  </div>
+
+  <p class="lead">
+    A grid of the 20 closest neighbours in this contribution space.
+    The <strong>combination</strong> of dimensions FactorWAM occupies — self-supervised
+    reward, no proprietary VLM judge, no robot, video-derived, WAM-aligned —
+    is empty in current literature. That empty cell is the paper.
+  </p>
+
+  <div class="lit-table-wrap">
+    <table class="lit-table">
+      <thead>
+        <tr>
+          <th>Paper</th>
+          <th>Venue · Year</th>
+          <th>Family</th>
+          <th>🎬 Video</th>
+          <th>🧠 World Model</th>
+          <th>🎯 Reward</th>
+          <th>🤖 RL Trained</th>
+          <th>🤖 Robot-Free</th>
+          <th>🔓 No VLM Judge</th>
+          <th>Gap vs Ours</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>V-JEPA</td><td>CVPR 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>No reward, no policy</td></tr>
+        <tr><td>V-JEPA 2.1</td><td>arXiv 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Backbone we extend</td></tr>
+        <tr><td>UniSim</td><td>ICLR 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Pixel sim, no reward</td></tr>
+        <tr><td>Genie 2</td><td>DeepMind 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Generation only</td></tr>
+        <tr><td>GAIA-2</td><td>Wayve 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Driving-specific</td></tr>
+        <tr><td>Cosmos</td><td>NVIDIA 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Foundation, not reward</td></tr>
+        <tr><td>DreamerV3</td><td>Nature 2025</td><td>World model</td><td>⚠️</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>✅</td><td>Pixel/state, not video</td></tr>
+        <tr><td>RT-2</td><td>Google 2023</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>❌</td><td>VLA Jim calls "dead"</td></tr>
+        <tr><td>OpenVLA</td><td>Stanford 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>✅</td><td>We use as policy backbone</td></tr>
+        <tr><td>Pi-Zero</td><td>Physical Intelligence 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>Needs robot data</td></tr>
+        <tr><td>Octo</td><td>Stanford 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>✅</td><td>Cross-embodiment, no reward</td></tr>
+        <tr><td>RoboReward</td><td>NVIDIA 2026</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>Uses VLM judge</td></tr>
+        <tr><td>VLP</td><td>NeurIPS 2025</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>Preference-based</td></tr>
+        <tr><td>SIRL</td><td>NeurIPS 2025</td><td>Reward model</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>Solver-as-judge, text only</td></tr>
+        <tr><td>RoboCLIP</td><td>NeurIPS 2023</td><td>Reward model</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>⚠️</td><td>⚠️</td><td>CLIP-based, no rollout</td></tr>
+        <tr><td>VL-RewardBench</td><td>CVPR 2025</td><td>Benchmark</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>Eval only</td></tr>
+        <tr><td>RT-X / Open-X</td><td>Google 2024</td><td>Dataset</td><td>⚠️</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>—</td><td>Robot trajectories only</td></tr>
+        <tr><td>Ego4D</td><td>Meta 2022</td><td>Dataset</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>—</td><td>No actions, no reward</td></tr>
+        <tr><td>EgoScale</td><td>NVIDIA 2025</td><td>Dataset</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>—</td><td>Glove + teleop hybrid</td></tr>
+        <tr><td>DreamDojo</td><td>NVIDIA 2026</td><td>Simulator</td><td>⚠️</td><td>✅</td><td>⚠️</td><td>✅</td><td>⚠️</td><td>✅</td><td>Sim infra, not reward</td></tr>
+        <tr class="ours">
+          <td><strong>FactorWAM (Ours)</strong></td>
+          <td><strong>2027 · target</strong></td>
+          <td><strong>Reward × WM</strong></td>
+          <td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td>
+          <td><strong>The empty cell.</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item">✅ fully addresses</span>
+    <span class="legend-item">⚠️ partial / indirect</span>
+    <span class="legend-item">❌ does not address</span>
+    <span class="legend-item">— not applicable</span>
+  </div>
+</section>
+
+<!-- CONNECTED PAPERS GRAPH -->
+<section class="section section-graph" id="graph">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Connected Papers · The Citation Topology</h2>
+    <span class="section-rule"></span>
+  </div>
+
+  <p class="lead">
+    Drag nodes, hover for paper detail, scroll to zoom. The center node is
+    FactorWAM; edge thickness encodes citation closeness; node colour encodes
+    research family. FactorJEPA + EgoActionVideo-50K sits at the convergence
+    of four fields — a defensible position.
+  </p>
+
+  <div class="graph-controls">
+    <div class="legend-grid">
+      <span class="legend-chip" data-family="world"><i class="chip world"></i>World Models</span>
+      <span class="legend-chip" data-family="vla"><i class="chip vla"></i>VLA / Action</span>
+      <span class="legend-chip" data-family="reward"><i class="chip reward"></i>Reward Models</span>
+      <span class="legend-chip" data-family="dataset"><i class="chip dataset"></i>Datasets</span>
+      <span class="legend-chip" data-family="sim"><i class="chip sim"></i>Simulators</span>
+      <span class="legend-chip" data-family="ours"><i class="chip ours"></i>FactorWAM (Ours)</span>
+    </div>
+    <div class="graph-tools">
+      <button id="reset-zoom">⟲ reset</button>
+      <button id="toggle-labels">𝐀 labels</button>
+    </div>
+  </div>
+
+  <div id="graph-container">
+    <svg id="graph-svg"></svg>
+    <div id="graph-tooltip" class="graph-tooltip" aria-hidden="true"></div>
+  </div>
+
+  <p class="graph-caption">
+    Figure 1 · 21-node citation topology. Edges drawn where one paper is a
+    direct intellectual ancestor or sibling of another. Force-directed layout
+    via D3.js v7.
+  </p>
+</section>
+
+<!-- TIMELINE / EXPECTED CONTRIBUTIONS -->
+<section class="section section-timeline" id="timeline">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Timeline &amp; Expected Contributions</h2>
+    <span class="section-rule"></span>
+  </div>
+
+  <div class="contrib-grid">
+    <div class="contrib-card">
+      <span class="contrib-num">C1</span>
+      <h4>EgoActionVideo-50K Dataset</h4>
+      <p>Public, glove-pose-annotated, citation-magnet artefact. Companion to FactorWAM.</p>
+    </div>
+    <div class="contrib-card">
+      <span class="contrib-num">C2</span>
+      <h4>FactorWAM Architecture</h4>
+      <p>First WAM derived purely from a self-supervised video JEPA encoder, no robot data.</p>
+    </div>
+    <div class="contrib-card">
+      <span class="contrib-num">C3</span>
+      <h4>Trajectory-Consistency Reward</h4>
+      <p>Replaces VLM judges. Provably cheaper, more reproducible, no API drift.</p>
+    </div>
+    <div class="contrib-card">
+      <span class="contrib-num">C4</span>
+      <h4>Real2Sim2Real Validation</h4>
+      <p>Open-X-Embodiment benchmark gains over teleop-only and proprietary-judge baselines.</p>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="t-row"><span class="t-when">May–Jun 2026</span><span class="t-what">FactorJEPA NeurIPS 2026 submission · prerequisite</span></div>
+    <div class="t-row"><span class="t-when">Jul–Aug 2026</span><span class="t-what">EgoActionVideo-50K curation &amp; HF release</span></div>
+    <div class="t-row"><span class="t-when">Sep–Oct 2026</span><span class="t-what">FactorWAM training · forward dynamics + action latent heads</span></div>
+    <div class="t-row"><span class="t-when">Nov 2026</span><span class="t-what">R1 reward · trajectory consistency formulation &amp; ablations</span></div>
+    <div class="t-row"><span class="t-when">Dec 2026 – Feb 2027</span><span class="t-what">R2 policy · OpenVLA + GRPO + Real2Sim2Real on Open-X-Embodiment</span></div>
+    <div class="t-row"><span class="t-when">Mar 2027</span><span class="t-what">Paper writing · CVPR rebuttal-ready draft</span></div>
+    <div class="t-row t-row-end"><span class="t-when">May 2027</span><span class="t-what">NeurIPS 2027 submission · backup venue</span></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="archival-footer">
+  <div class="footer-grid">
+    <div>
+      <span class="foot-label">Status</span>
+      <span class="foot-value">Proposal · pre-submission</span>
+    </div>
+    <div>
+      <span class="foot-label">Compute Budget</span>
+      <span class="foot-value">≤ $1.5K total</span>
+    </div>
+    <div>
+      <span class="foot-label">Target</span>
+      <span class="foot-value">CVPR 2027 / NeurIPS 2027</span>
+    </div>
+  </div>
+  <div class="footer-rule"></div>
+  <p class="foot-note">
+    Document compiled 2026-05-09 · FactorWAM working draft v0.1 ·
+    All comparisons drawn from public arXiv preprints and conference proceedings ·
+    No proprietary Canva data or models used in this proposal.
+  </p>
+</footer>
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="mermaid-init.js"></script>
+<script src="connected-papers.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
