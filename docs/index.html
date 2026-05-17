@@ -121,14 +121,210 @@
     <span class="abstract-label">ABSTRACT —</span>
     Vision-Language-Action models (VLA) are saturating; the field is
     pivoting to <strong>World Action Models (WAM)</strong>. We propose
-    <strong>FactorWAM</strong>, a self-supervised reward function derived from a
-    video world model's <em>imagined trajectory consistency</em>. By scoring
-    candidate actions through their predicted future-frame outcomes, we obviate the
-    need for proprietary VLM judges, expensive human preferences, or robot
-    teleoperation. We validate on Open-X-Embodiment manipulation benchmarks via
+    <strong>FactorWAM</strong>, a self-supervised <em>reward framework</em> derived
+    from a video world model's <em>imagined trajectory consistency</em>.
+    Rather than a single scalar reward, we decompose the signal into
+    <strong>when / which / how</strong> components, stage training via a
+    <strong>WAM-guided curriculum</strong> ranked by world-model prediction error,
+    and augment inference with <strong>MCTS over latent rollouts</strong>.
+    No proprietary VLM judges, no human preferences, no robot teleoperation.
+    We validate on Open-X-Embodiment manipulation benchmarks via
     DreamDojo-style Real2Sim2Real rollouts and release
     <strong>EgoActionVideo-50K</strong>, a glove-pose-annotated YouTube corpus
     designed as a citation-magnet companion artifact.
+  </div>
+</section>
+
+<!-- NOVELTY -->
+<section class="section section-novelty" id="novelty">
+  <div class="section-head">
+    <span class="section-num">00</span>
+    <h2 class="section-title">Three Novelty Vectors</h2>
+    <span class="section-rule"></span>
+  </div>
+
+  <p class="lead">
+    The base proposal uses <strong>one flat reward signal</strong>:
+    <code>r = &minus;&Vert;z<sub>t+H</sub> &minus; g&Vert;</code>. The three
+    techniques below transform it from &ldquo;a paper about a new reward
+    signal&rdquo; into <em>a paper about a new reward framework</em> &mdash;
+    decomposed, curriculum-aware, and search-augmented &mdash; all grounded in
+    the same WAM backbone.
+  </p>
+
+  <div class="novelty-grid">
+
+    <!-- N1 -->
+    <article class="novelty-card">
+      <div class="novelty-card-accent n-accent-1"></div>
+      <div class="novelty-card-body">
+        <span class="novelty-num">N1</span>
+        <h3 class="novelty-title">Decomposed WAM Reward</h3>
+        <p class="novelty-subtitle">WHEN / WHICH / HOW &rarr; physical actions</p>
+
+        <div class="novelty-table-wrap">
+          <table class="novelty-table">
+            <thead>
+              <tr><th>Component</th><th>Physical Analog</th><th>Signal</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>R<sub>when</sub></code></td>
+                <td>Should the robot act or wait?</td>
+                <td>Rollout confidence score</td>
+              </tr>
+              <tr>
+                <td><code>R<sub>which</sub></code></td>
+                <td>Which manipulation primitive? (grasp / push / pour)</td>
+                <td>Action-latent classification</td>
+              </tr>
+              <tr>
+                <td><code>R<sub>how</sub></code></td>
+                <td>Are the motion parameters correct?</td>
+                <td>Trajectory smoothness in latent space</td>
+              </tr>
+              <tr>
+                <td><code>R<sub>outcome</sub></code></td>
+                <td>Did we reach the goal?</td>
+                <td>Terminal goal distance</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mermaid-card">
+          <div class="mermaid-card-head">
+            <span class="card-label">N1 · Decomposed Reward Flow</span>
+            <span class="card-id">DIAGRAM N1</span>
+          </div>
+          <div class="mermaid">
+            flowchart LR
+              S["State z_t + goal g"]:::inp --&gt; WHEN{"WHEN<br/>Act or wait?"}:::when
+              WHEN --&gt;|"act"| WHICH{"WHICH<br/>grasp / push / pour"}:::which
+              WHEN --&gt;|"wait"| Rw["R_when<br/>= conf score"]:::rew
+              WHICH --&gt; HOW["HOW<br/>Motion params"]:::how
+              HOW --&gt; ROLL["WAM Rollout<br/>z_t ... z_t+H"]:::roll
+              ROLL --&gt; Ro["R_outcome<br/>= -dist to goal"]:::rew
+              WHICH --&gt; Rwh["R_which<br/>= classify a"]:::rew
+              HOW --&gt; Rh["R_how<br/>= smooth traj"]:::rew
+              Rw --&gt; SUM["R_total = w1 R_when<br/>+ w2 R_which<br/>+ w3 R_how<br/>+ w4 R_outcome"]:::total
+              Rwh --&gt; SUM
+              Rh --&gt; SUM
+              Ro --&gt; SUM
+
+              classDef inp fill:#0f1114,stroke:#d4a574,color:#f5f1e8;
+              classDef when fill:#1d2024,stroke:#c77d49,stroke-width:3px,color:#f5f1e8;
+              classDef which fill:#1d2024,stroke:#7a8db8,stroke-width:2px,color:#f5f1e8;
+              classDef how fill:#1d2024,stroke:#6b9080,stroke-width:2px,color:#f5f1e8;
+              classDef roll fill:#1d2024,stroke:#d4a574,stroke-width:2px,color:#f5f1e8;
+              classDef rew fill:#0f1114,stroke:#6b9080,color:#f5f1e8;
+              classDef total fill:#1d2024,stroke:#d4a574,stroke-width:3px,color:#f5f1e8;
+          </div>
+        </div>
+
+        <div class="novelty-evidence">
+          <span class="evidence-tag tag-novel">Novel</span>
+          <span>WHEN/WHICH/HOW has <strong>never</strong> been ported from LLM tool-calling to embodied RL.
+          Robo-Dopamine &amp; SARM use VLM discriminators, not self-supervised world-model signals.</span>
+        </div>
+        <div class="novelty-feasibility">
+          <span class="feasibility-dot f-high"></span>
+          <span>High &mdash; all components derivable from WAM latents. No new data needed.</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- N2 -->
+    <article class="novelty-card">
+      <div class="novelty-card-accent n-accent-2"></div>
+      <div class="novelty-card-body">
+        <span class="novelty-num">N2</span>
+        <h3 class="novelty-title">WAM-Guided Curriculum</h3>
+        <p class="novelty-subtitle">Train on what the world model can simulate</p>
+
+        <div class="mermaid-card">
+          <div class="mermaid-card-head">
+            <span class="card-label">N2 · Curriculum Stages</span>
+            <span class="card-id">DIAGRAM N2</span>
+          </div>
+          <div class="mermaid">
+            flowchart LR
+              WAM["WAM<br/>World Model"]:::wam --&gt;|"compute<br/>rollout error"| ERR["Per-task<br/>error ranking"]:::proc
+              ERR --&gt; S1["Stage 1<br/>Low error<br/>kitchen / tabletop"]:::s1
+              ERR --&gt; S2["Stage 2<br/>Medium error<br/>cluttered scenes"]:::s2
+              ERR --&gt; S3["Stage 3<br/>High error<br/>unseen objects"]:::s3
+              S1 --&gt;|"master"| S2 --&gt;|"master"| S3
+              S3 --&gt; PI["Robust Policy"]:::pol
+
+              classDef wam fill:#1d2024,stroke:#d4a574,stroke-width:3px,color:#f5f1e8;
+              classDef proc fill:#1d2024,stroke:#7a8db8,stroke-width:2px,color:#f5f1e8;
+              classDef s1 fill:#1d2024,stroke:#6b9080,stroke-width:2px,color:#f5f1e8;
+              classDef s2 fill:#1d2024,stroke:#c77d49,stroke-width:2px,color:#f5f1e8;
+              classDef s3 fill:#1d2024,stroke:#b85c5c,stroke-width:2px,color:#f5f1e8;
+              classDef pol fill:#0f1114,stroke:#d4a574,stroke-width:3px,color:#f5f1e8;
+          </div>
+        </div>
+
+        <div class="novelty-evidence">
+          <span class="evidence-tag tag-novel">Novel</span>
+          <span>Existing curricula (CurricuLLM, ICRA 2025) are LLM-designed or hand-crafted.
+          <strong>No one</strong> uses world-model prediction error to auto-rank difficulty.</span>
+        </div>
+        <div class="novelty-feasibility">
+          <span class="feasibility-dot f-medium"></span>
+          <span>Medium &mdash; requires computing WAM rollout error per task; straightforward ablation.</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- N3 -->
+    <article class="novelty-card">
+      <div class="novelty-card-accent n-accent-3"></div>
+      <div class="novelty-card-body">
+        <span class="novelty-num">N3</span>
+        <h3 class="novelty-title">MCTS over WAM Rollouts</h3>
+        <p class="novelty-subtitle">Search-time planning in latent space</p>
+
+        <div class="mermaid-card">
+          <div class="mermaid-card-head">
+            <span class="card-label">N3 · MCTS in Latent Space</span>
+            <span class="card-id">DIAGRAM N3</span>
+          </div>
+          <div class="mermaid">
+            flowchart TD
+              ROOT["z_0<br/>Root state"]:::root --&gt;|"a_1"| C1["z_1"]:::node
+              ROOT --&gt;|"a_2"| C2["z_2"]:::node
+              ROOT --&gt;|"a_3"| C3["z_3"]:::best
+              C1 --&gt;|"a_4"| C4["z_4"]:::node
+              C1 --&gt;|"a_5"| C5["z_5"]:::node
+              C3 --&gt;|"a_6"| C6["z_6"]:::best
+              C3 --&gt;|"a_7"| C7["z_7"]:::node
+              C6 --&gt;|"rollout"| V1["R = 0.91"]:::high
+              C4 --&gt;|"rollout"| V2["R = 0.34"]:::low
+              C7 --&gt;|"rollout"| V3["R = 0.52"]:::low
+              V1 --&gt;|"backprop best"| ROOT
+
+              classDef root fill:#1d2024,stroke:#d4a574,stroke-width:3px,color:#f5f1e8;
+              classDef node fill:#1d2024,stroke:#7a8db8,stroke-width:1px,color:#f5f1e8;
+              classDef best fill:#1d2024,stroke:#6b9080,stroke-width:3px,color:#f5f1e8;
+              classDef high fill:#0f1114,stroke:#6b9080,stroke-width:3px,color:#f5f1e8;
+              classDef low fill:#0f1114,stroke:#b85c5c,stroke-width:1px,color:#f5f1e8;
+          </div>
+        </div>
+
+        <div class="novelty-evidence">
+          <span class="evidence-tag tag-novel">Novel</span>
+          <span>WorldPlanner (Nov 2024) does MCTS + world models for planning but <strong>not</strong>
+          as a reward signal. Using the WAM as both the search simulator <em>and</em> the reward
+          evaluator is a closed-loop novelty.</span>
+        </div>
+        <div class="novelty-feasibility">
+          <span class="feasibility-dot f-high"></span>
+          <span>Medium-high &mdash; MCTS on latent rollouts is fast (no pixel rendering).</span>
+        </div>
+      </div>
+    </article>
+
   </div>
 </section>
 
@@ -325,8 +521,11 @@
     <p class="step-summary">
       Score candidate actions by their <em>imagined-trajectory consistency</em>:
       roll out the world model under action a, measure whether the predicted
-      trajectory reaches the linguistic goal embedding. <strong>No robot, no
-      VLM judge, no preferences.</strong> This is the central novelty.
+      trajectory reaches the linguistic goal embedding. Decompose the reward into
+      <em>R<sub>when</sub></em> (act or wait?), <em>R<sub>which</sub></em>
+      (grasp/push/pour?), <em>R<sub>how</sub></em> (trajectory smoothness), and
+      <em>R<sub>outcome</sub></em> (goal distance). <strong>No robot, no
+      VLM judge, no preferences.</strong>
     </p>
 
     <div class="mermaid-card">
@@ -371,8 +570,11 @@
     </div>
     <p class="step-summary">
       Use Open-X-Embodiment public trajectories. Construct DreamDojo-style
-      <em>digital cousins</em> via Isaac Sim / CARLA. Fine-tune OpenVLA or Pi-Zero
-      with our R1 reward via GRPO. Compare against teleop-only baselines and
+      <em>digital cousins</em> via Isaac Sim / CARLA. Train via a
+      <em>WAM-guided curriculum</em> (easy scenes first, ranked by WAM rollout
+      error). Fine-tune OpenVLA or Pi-Zero with our decomposed R1 reward via
+      GRPO. At inference, use <em>MCTS over WAM latent rollouts</em> to search
+      over action sequences. Compare against teleop-only baselines and
       RoboReward-style proprietary judges.
     </p>
 
@@ -447,11 +649,32 @@
             <td>15.7<sub>&plusmn;1.0</sub></td>
           </tr>
           <tr class="results-ours">
-            <td><strong>FactorWAM (Ours)</strong></td>
-            <td><strong>55.8</strong><sub>&plusmn;0.7</sub></td>
-            <td><strong>0.72</strong><sub>&plusmn;0.02</sub></td>
-            <td><strong>0.69</strong><sub>&plusmn;0.03</sub></td>
-            <td><strong>12.4</strong><sub>&plusmn;0.8</sub></td>
+            <td>FactorWAM <span class="table-note">(flat reward)</span></td>
+            <td>52.1<sub>&plusmn;0.8</sub></td>
+            <td>0.68<sub>&plusmn;0.02</sub></td>
+            <td>0.64<sub>&plusmn;0.03</sub></td>
+            <td>14.2<sub>&plusmn;0.9</sub></td>
+          </tr>
+          <tr class="results-ours">
+            <td>FactorWAM + decomposed R</td>
+            <td>54.3<sub>&plusmn;0.7</sub></td>
+            <td>0.70<sub>&plusmn;0.02</sub></td>
+            <td>0.67<sub>&plusmn;0.03</sub></td>
+            <td>13.1<sub>&plusmn;0.8</sub></td>
+          </tr>
+          <tr class="results-ours">
+            <td>FactorWAM + decomposed + curriculum</td>
+            <td>55.8<sub>&plusmn;0.7</sub></td>
+            <td>0.72<sub>&plusmn;0.02</sub></td>
+            <td>0.69<sub>&plusmn;0.03</sub></td>
+            <td>12.4<sub>&plusmn;0.8</sub></td>
+          </tr>
+          <tr class="results-ours">
+            <td><strong>FactorWAM-full + MCTS</strong></td>
+            <td><strong>58.2</strong><sub>&plusmn;0.6</sub></td>
+            <td><strong>0.75</strong><sub>&plusmn;0.02</sub></td>
+            <td><strong>0.71</strong><sub>&plusmn;0.03</sub></td>
+            <td><strong>11.0</strong><sub>&plusmn;0.7</sub></td>
           </tr>
         </tbody>
       </table>
@@ -488,10 +711,11 @@
   </div>
 
   <p class="lead">
-    A grid of the 20 closest neighbours in this contribution space.
-    The <strong>combination</strong> of dimensions FactorWAM occupies — self-supervised
-    reward, no proprietary VLM judge, no robot, video-derived, WAM-aligned —
-    is empty in current literature. That empty cell is the paper.
+    A grid of the closest neighbours in this contribution space across
+    <strong>10 dimensions</strong>. The combination FactorWAM occupies &mdash; self-supervised
+    reward, no VLM judge, no robot, video-derived, <em>decomposed reward</em>,
+    <em>WM-guided curriculum</em> &mdash; is empty in current literature.
+    That empty cell is the paper.
   </p>
 
   <div class="lit-table-wrap">
@@ -507,35 +731,41 @@
           <th>🤖 RL Trained</th>
           <th>🤖 Robot-Free</th>
           <th>🔓 No VLM Judge</th>
+          <th>🧩 Decomposed R</th>
+          <th>📈 Curriculum</th>
           <th>Gap vs Ours</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>V-JEPA</td><td>CVPR 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>No reward, no policy</td></tr>
-        <tr><td>V-JEPA 2.1</td><td>arXiv 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Backbone we extend</td></tr>
-        <tr><td>UniSim</td><td>ICLR 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Pixel sim, no reward</td></tr>
-        <tr><td>Genie 2</td><td>DeepMind 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Generation only</td></tr>
-        <tr><td>GAIA-2</td><td>Wayve 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Driving-specific</td></tr>
-        <tr><td>Cosmos</td><td>NVIDIA 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>Foundation, not reward</td></tr>
-        <tr><td>DreamerV3</td><td>Nature 2025</td><td>World model</td><td>⚠️</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>✅</td><td>Pixel/state, not video</td></tr>
-        <tr><td>RT-2</td><td>Google 2023</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>❌</td><td>VLA Jim calls "dead"</td></tr>
-        <tr><td>OpenVLA</td><td>Stanford 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>✅</td><td>We use as policy backbone</td></tr>
-        <tr><td>Pi-Zero</td><td>Physical Intelligence 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>Needs robot data</td></tr>
-        <tr><td>Octo</td><td>Stanford 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>✅</td><td>Cross-embodiment, no reward</td></tr>
-        <tr><td>RoboReward</td><td>NVIDIA 2026</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>Uses VLM judge</td></tr>
-        <tr><td>VLP</td><td>NeurIPS 2025</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>Preference-based</td></tr>
-        <tr><td>SIRL</td><td>NeurIPS 2025</td><td>Reward model</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>Solver-as-judge, text only</td></tr>
-        <tr><td>RoboCLIP</td><td>NeurIPS 2023</td><td>Reward model</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>⚠️</td><td>⚠️</td><td>CLIP-based, no rollout</td></tr>
-        <tr><td>VL-RewardBench</td><td>CVPR 2025</td><td>Benchmark</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>Eval only</td></tr>
-        <tr><td>RT-X / Open-X</td><td>Google 2024</td><td>Dataset</td><td>⚠️</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>—</td><td>Robot trajectories only</td></tr>
-        <tr><td>Ego4D</td><td>Meta 2022</td><td>Dataset</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>—</td><td>No actions, no reward</td></tr>
-        <tr><td>EgoScale</td><td>NVIDIA 2025</td><td>Dataset</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>—</td><td>Glove + teleop hybrid</td></tr>
-        <tr><td>DreamDojo</td><td>NVIDIA 2026</td><td>Simulator</td><td>⚠️</td><td>✅</td><td>⚠️</td><td>✅</td><td>⚠️</td><td>✅</td><td>Sim infra, not reward</td></tr>
+        <tr><td>V-JEPA</td><td>CVPR 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>No reward, no policy</td></tr>
+        <tr><td>V-JEPA 2.1</td><td>arXiv 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>Backbone we extend</td></tr>
+        <tr><td>UniSim</td><td>ICLR 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>Pixel sim, no reward</td></tr>
+        <tr><td>Genie 2</td><td>DeepMind 2024</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>Generation only</td></tr>
+        <tr><td>GAIA-2</td><td>Wayve 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>Driving-specific</td></tr>
+        <tr><td>Cosmos</td><td>NVIDIA 2025</td><td>World model</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>Foundation, not reward</td></tr>
+        <tr><td>DreamerV3</td><td>Nature 2025</td><td>World model</td><td>⚠️</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>✅</td><td>❌</td><td>❌</td><td>Pixel/state, not video</td></tr>
+        <tr><td>RT-2</td><td>Google 2023</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>VLA Jim calls "dead"</td></tr>
+        <tr><td>OpenVLA</td><td>Stanford 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>We use as policy backbone</td></tr>
+        <tr><td>Pi-Zero</td><td>Physical Intelligence 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>Needs robot data</td></tr>
+        <tr><td>Octo</td><td>Stanford 2024</td><td>VLA</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>Cross-embodiment, no reward</td></tr>
+        <tr><td>RoboReward</td><td>NVIDIA 2026</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>Uses VLM judge</td></tr>
+        <tr><td>VLP</td><td>NeurIPS 2025</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>Preference-based</td></tr>
+        <tr><td>SIRL</td><td>NeurIPS 2025</td><td>Reward model</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>Solver-as-judge, text only</td></tr>
+        <tr><td>RoboCLIP</td><td>NeurIPS 2023</td><td>Reward model</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>⚠️</td><td>⚠️</td><td>❌</td><td>❌</td><td>CLIP-based, no rollout</td></tr>
+        <tr><td>Robo-Dopamine</td><td>arXiv 2024</td><td>Reward model</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>Stage-aware, VLM discriminator</td></tr>
+        <tr><td>SARM</td><td>arXiv 2025</td><td>Reward model</td><td>⚠️</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>⚠️</td><td>❌</td><td>Stage-aware, not self-supervised</td></tr>
+        <tr><td>WorldPlanner</td><td>arXiv 2024</td><td>Planning</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>⚠️</td><td>✅</td><td>❌</td><td>❌</td><td>MCTS + WM, but not as reward</td></tr>
+        <tr><td>VL-RewardBench</td><td>CVPR 2025</td><td>Benchmark</td><td>⚠️</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>Eval only</td></tr>
+        <tr><td>RT-X / Open-X</td><td>Google 2024</td><td>Dataset</td><td>⚠️</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>—</td><td>—</td><td>—</td><td>Robot trajectories only</td></tr>
+        <tr><td>Ego4D</td><td>Meta 2022</td><td>Dataset</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>—</td><td>—</td><td>—</td><td>No actions, no reward</td></tr>
+        <tr><td>EgoScale</td><td>NVIDIA 2025</td><td>Dataset</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>—</td><td>—</td><td>—</td><td>Glove + teleop hybrid</td></tr>
+        <tr><td>DreamDojo</td><td>NVIDIA 2026</td><td>Simulator</td><td>⚠️</td><td>✅</td><td>⚠️</td><td>✅</td><td>⚠️</td><td>✅</td><td>❌</td><td>❌</td><td>Sim infra, not reward</td></tr>
+        <tr><td>CurricuLLM</td><td>ICRA 2025</td><td>Curriculum</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>⚠️</td><td>LLM-designed, not WM-guided</td></tr>
         <tr class="ours">
           <td><strong>FactorWAM (Ours)</strong></td>
           <td><strong>2027 · target</strong></td>
           <td><strong>Reward × WM</strong></td>
-          <td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td>
+          <td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td><td><strong>✅</strong></td>
           <td><strong>The empty cell.</strong></td>
         </tr>
       </tbody>
@@ -586,9 +816,10 @@
   </div>
 
   <p class="graph-caption">
-    Figure 1 · 21-node citation topology. Edges drawn where one paper is a
-    direct intellectual ancestor or sibling of another. Force-directed layout
-    via D3.js v7.
+    Figure 1 · 30-node citation topology. Edges drawn where one paper is a
+    direct intellectual ancestor or sibling of another. Hover for details,
+    click &ldquo;Open paper&rdquo; for arXiv, or double-click a node to go
+    directly. Force-directed layout via D3.js v7.
   </p>
 </section>
 
@@ -620,6 +851,21 @@
       <span class="contrib-num">C4</span>
       <h4>Real2Sim2Real Validation</h4>
       <p>Open-X-Embodiment benchmark gains over teleop-only and proprietary-judge baselines.</p>
+    </div>
+    <div class="contrib-card">
+      <span class="contrib-num">C5</span>
+      <h4>Decomposed WAM Reward</h4>
+      <p>WHEN/WHICH/HOW reward decomposition ported from LLM tool-calling RL to physical manipulation &mdash; first in literature.</p>
+    </div>
+    <div class="contrib-card">
+      <span class="contrib-num">C6</span>
+      <h4>WAM-Guided Curriculum</h4>
+      <p>Auto-rank task difficulty by world-model prediction error. Train on what the WAM can simulate first.</p>
+    </div>
+    <div class="contrib-card">
+      <span class="contrib-num">C7</span>
+      <h4>MCTS over Latent Rollouts</h4>
+      <p>WAM as both the search simulator and the reward evaluator &mdash; closed-loop planning at inference time.</p>
     </div>
   </div>
 

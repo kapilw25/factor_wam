@@ -1,73 +1,82 @@
 /* ============================================================
    Connected Papers · D3.js v7 force graph
-   21 nodes · 5 research families + ours at center
+   30 nodes · 5 research families + ours at center · click-to-arXiv
    ============================================================ */
 
 (function () {
   // ------- DATA -------
   const nodes = [
     // OURS (center)
-    {
-      id: "factorwam",
-      title: "FactorWAM (Ours)",
-      family: "ours",
-      year: 2027,
-      venue: "CVPR / NeurIPS",
-      desc:
-        "World Action Models as Self-Supervised Reward Signals. Trajectory-consistency reward derived from a video JEPA world model. No robot, no VLM judge."
-    },
+    { id: "factorwam", title: "FactorWAM (Ours)", family: "ours", year: 2027, venue: "CVPR / NeurIPS", url: null,
+      desc: "World Action Models as Self-Supervised Reward Signals. Decomposed reward, WAM-guided curriculum, MCTS over latent rollouts. No robot, no VLM judge." },
 
     // WORLD MODELS
-    { id: "vjepa", title: "V-JEPA", family: "world", year: 2024, venue: "CVPR",
+    { id: "vjepa", title: "V-JEPA", family: "world", year: 2024, venue: "Meta FAIR", url: "https://arxiv.org/abs/2404.08471",
       desc: "Joint-embedding predictive architecture for video. Backbone family for FactorWAM." },
-    { id: "vjepa2", title: "V-JEPA 2.1", family: "world", year: 2025, venue: "arXiv",
-      desc: "Successor with motion-aware features. Direct backbone for our encoder." },
-    { id: "unisim", title: "UniSim", family: "world", year: 2024, venue: "ICLR",
+    { id: "vjepa2", title: "V-JEPA 2.1", family: "world", year: 2026, venue: "arXiv", url: "https://arxiv.org/abs/2603.14482",
+      desc: "Successor with motion-aware dense features. Direct backbone for our encoder." },
+    { id: "unisim", title: "UniSim", family: "world", year: 2024, venue: "ICLR", url: "https://arxiv.org/abs/2310.06114",
       desc: "Universal video-prediction simulator. Pixel-level world model." },
-    { id: "genie2", title: "Genie 2", family: "world", year: 2024, venue: "DeepMind",
+    { id: "genie2", title: "Genie 2", family: "world", year: 2024, venue: "DeepMind", url: "https://deepmind.google/blog/genie-2-a-large-scale-foundation-world-model/",
       desc: "Foundation world model that generates playable environments from text/image." },
-    { id: "gaia2", title: "GAIA-2", family: "world", year: 2025, venue: "Wayve",
+    { id: "gaia2", title: "GAIA-2", family: "world", year: 2025, venue: "Wayve", url: "https://arxiv.org/abs/2503.20523",
       desc: "Driving-domain world model. Domain-specific cousin of FactorWAM." },
-    { id: "cosmos", title: "Cosmos", family: "world", year: 2025, venue: "NVIDIA",
+    { id: "cosmos", title: "Cosmos", family: "world", year: 2025, venue: "NVIDIA", url: "https://arxiv.org/abs/2501.03575",
       desc: "Foundation world model for physical AI. Scale ancestor of WAM idea." },
-    { id: "dreamerv3", title: "DreamerV3", family: "world", year: 2025, venue: "Nature",
+    { id: "dreamerv3", title: "DreamerV3", family: "world", year: 2025, venue: "Nature", url: "https://arxiv.org/abs/2301.04104",
       desc: "Generalist world-model RL. Closest ancestor for our reward formulation." },
-    { id: "dinov2", title: "DINOv2", family: "world", year: 2024, venue: "Meta FAIR",
-      desc: "SSL vision foundation. Co-author Vasu Sharma. Aesthetic ancestor." },
+    { id: "dinov2", title: "DINOv2", family: "world", year: 2024, venue: "Meta FAIR", url: "https://arxiv.org/abs/2304.07193",
+      desc: "SSL vision foundation model. Aesthetic ancestor." },
+    { id: "worldplanner", title: "WorldPlanner", family: "world", year: 2025, venue: "arXiv", url: "https://arxiv.org/abs/2511.03077",
+      desc: "MCTS + MPC with visual world models. First long-horizon real-world planning. We use WAM as both simulator AND reward." },
 
     // VLA / ACTION
-    { id: "rt2", title: "RT-2", family: "vla", year: 2023, venue: "Google",
+    { id: "rt2", title: "RT-2", family: "vla", year: 2023, venue: "Google", url: "https://arxiv.org/abs/2307.15818",
       desc: "Vision-Language-Action transformer. Jim Fan calls VLA family 'dead' post-2025." },
-    { id: "openvla", title: "OpenVLA", family: "vla", year: 2024, venue: "Stanford",
+    { id: "openvla", title: "OpenVLA", family: "vla", year: 2024, venue: "Stanford", url: "https://arxiv.org/abs/2406.09246",
       desc: "Open VLA used as our policy backbone in Step 4." },
-    { id: "pizero", title: "Pi-Zero", family: "vla", year: 2024, venue: "Physical Intelligence",
+    { id: "pizero", title: "Pi-Zero", family: "vla", year: 2024, venue: "Physical Intelligence", url: "https://arxiv.org/abs/2410.24164",
       desc: "Generalist robot policy. Needs robot data — we don't." },
-    { id: "octo", title: "Octo", family: "vla", year: 2024, venue: "Stanford",
+    { id: "octo", title: "Octo", family: "vla", year: 2024, venue: "Stanford", url: "https://arxiv.org/abs/2405.12213",
       desc: "Cross-embodiment VLA. Trained on Open-X-Embodiment." },
+    { id: "maniplvm", title: "ManipLVM-R1", family: "vla", year: 2025, venue: "AAAI 2026", url: "https://arxiv.org/abs/2505.16517",
+      desc: "RL for reasoning in embodied manipulation. Affordance + trajectory rewards. Closest competitor — uses VLM supervision, not WAM." },
 
     // REWARD MODELS
-    { id: "roboreward", title: "RoboReward", family: "reward", year: 2026, venue: "NVIDIA",
+    { id: "roboreward", title: "RoboReward", family: "reward", year: 2026, venue: "NVIDIA", url: "https://arxiv.org/abs/2601.00675",
       desc: "Vision-language reward model. Uses proprietary VLM judge — exactly what we replace." },
-    { id: "vlp", title: "VLP", family: "reward", year: 2025, venue: "NeurIPS",
+    { id: "vlp", title: "VLP", family: "reward", year: 2025, venue: "EMNLP 2025", url: "https://arxiv.org/abs/2502.11918",
       desc: "Vision-Language Preference Learning. Preference-based, expensive labels." },
-    { id: "sirl", title: "SIRL", family: "reward", year: 2025, venue: "NeurIPS",
+    { id: "sirl", title: "SIRL", family: "reward", year: 2025, venue: "NeurIPS", url: "https://arxiv.org/abs/2505.11792",
       desc: "Solver-as-reward for LLMs. Text-only ancestor of our self-judging idea." },
-    { id: "roboclip", title: "RoboCLIP", family: "reward", year: 2023, venue: "NeurIPS",
+    { id: "roboclip", title: "RoboCLIP", family: "reward", year: 2023, venue: "NeurIPS", url: "https://arxiv.org/abs/2310.07899",
       desc: "CLIP-based reward for video imitation. No rollout, no world model." },
-    { id: "vlrewardbench", title: "VL-RewardBench", family: "reward", year: 2025, venue: "CVPR",
+    { id: "vlrewardbench", title: "VL-RewardBench", family: "reward", year: 2025, venue: "CVPR", url: "https://arxiv.org/abs/2411.17451",
       desc: "Benchmark for VL reward models. Eval target for our R1." },
+    { id: "robodopamine", title: "Robo-Dopamine", family: "reward", year: 2025, venue: "CVPR 2026", url: "https://arxiv.org/abs/2512.23703",
+      desc: "Step-aware process reward for manipulation. Multi-view GRM. Uses VLM discriminator — we use self-supervised WAM." },
+    { id: "sarm", title: "SARM", family: "reward", year: 2025, venue: "ICLR 2026", url: "https://arxiv.org/abs/2509.25358",
+      desc: "Stage-aware reward for long-horizon manipulation. Language subtask labels. We decompose from WAM, not from labels." },
+    { id: "retool", title: "ReTool", family: "reward", year: 2025, venue: "arXiv", url: "https://arxiv.org/abs/2504.11536",
+      desc: "RL for strategic tool use in LLMs. WHEN/HOW decomposition for code tools. We port this to physical manipulation." },
+    { id: "toolrl", title: "ToolRL", family: "reward", year: 2025, venue: "arXiv", url: "https://arxiv.org/abs/2504.13958",
+      desc: "Decomposed reward design for LLM tool learning via GRPO. Direct ancestor of our reward decomposition idea." },
+    { id: "agentq", title: "Agent Q", family: "reward", year: 2024, venue: "arXiv", url: "https://arxiv.org/abs/2408.07199",
+      desc: "MCTS + DPO for LLM agents. 340% boost on web tasks. We adapt MCTS-over-latents to embodied RL." },
 
     // DATASETS
-    { id: "ego4d", title: "Ego4D", family: "dataset", year: 2022, venue: "Meta",
+    { id: "ego4d", title: "Ego4D", family: "dataset", year: 2022, venue: "Meta", url: "https://arxiv.org/abs/2110.07058",
       desc: "First massive egocentric video corpus. Predecessor of EgoActionVideo-50K." },
-    { id: "openx", title: "Open-X-Embodiment", family: "dataset", year: 2024, venue: "Google",
+    { id: "openx", title: "Open-X-Embodiment", family: "dataset", year: 2024, venue: "Google", url: "https://arxiv.org/abs/2310.08864",
       desc: "Robot trajectories across 22 embodiments. Used in our Step 4." },
-    { id: "egoscale", title: "EgoScale", family: "dataset", year: 2025, venue: "NVIDIA",
+    { id: "egoscale", title: "EgoScale", family: "dataset", year: 2025, venue: "NVIDIA", url: "https://arxiv.org/abs/2602.16710",
       desc: "Glove + teleop scaling. Direct inspiration for our annotation strategy." },
 
-    // SIMULATORS
-    { id: "dreamdojo", title: "DreamDojo", family: "sim", year: 2026, venue: "NVIDIA",
-      desc: "Real2Sim2Real neural physics engine. We use its philosophy in Step 4." }
+    // SIMULATORS / CURRICULUM
+    { id: "dreamdojo", title: "DreamDojo", family: "sim", year: 2026, venue: "NVIDIA", url: "https://arxiv.org/abs/2602.06949",
+      desc: "Generalist robot world model from large-scale human videos. Real2Sim2Real philosophy." },
+    { id: "curricullm", title: "CurricuLLM", family: "sim", year: 2025, venue: "ICRA 2025", url: "https://arxiv.org/abs/2409.18382",
+      desc: "LLM-designed task curricula for robot skills. Hand-crafted difficulty — we auto-rank by WAM prediction error." }
   ];
 
   // edges: from → to (which paper our paper directly cites or descends from)
@@ -94,6 +103,15 @@
     { source: "factorwam", target: "dreamdojo", weight: 4 },
     { source: "factorwam", target: "rt2", weight: 1 },
     { source: "factorwam", target: "gaia2", weight: 2 },
+    // new novelty connections from ours
+    { source: "factorwam", target: "robodopamine", weight: 4 },
+    { source: "factorwam", target: "sarm", weight: 4 },
+    { source: "factorwam", target: "retool", weight: 5 },
+    { source: "factorwam", target: "toolrl", weight: 5 },
+    { source: "factorwam", target: "maniplvm", weight: 4 },
+    { source: "factorwam", target: "curricullm", weight: 4 },
+    { source: "factorwam", target: "worldplanner", weight: 5 },
+    { source: "factorwam", target: "agentq", weight: 3 },
 
     // intra-family edges (existing literature topology)
     { source: "vjepa2", target: "vjepa", weight: 5 },
@@ -116,7 +134,20 @@
 
     { source: "egoscale", target: "ego4d", weight: 3 },
     { source: "dreamdojo", target: "cosmos", weight: 3 },
-    { source: "dreamdojo", target: "egoscale", weight: 2 }
+    { source: "dreamdojo", target: "egoscale", weight: 2 },
+
+    // new intra-family edges for novelty papers
+    { source: "robodopamine", target: "roboreward", weight: 3 },
+    { source: "robodopamine", target: "roboclip", weight: 2 },
+    { source: "sarm", target: "robodopamine", weight: 4 },
+    { source: "retool", target: "toolrl", weight: 5 },
+    { source: "toolrl", target: "sirl", weight: 2 },
+    { source: "agentq", target: "retool", weight: 3 },
+    { source: "maniplvm", target: "openvla", weight: 3 },
+    { source: "maniplvm", target: "roboreward", weight: 2 },
+    { source: "worldplanner", target: "dreamerv3", weight: 4 },
+    { source: "worldplanner", target: "cosmos", weight: 2 },
+    { source: "curricullm", target: "dreamdojo", weight: 2 }
   ];
 
   // ------- COLORS -------
@@ -259,10 +290,14 @@
     .on("mouseenter", function (e, d) {
       d3.select(this).select("circle").transition().duration(120).attr("r", d.id === "factorwam" ? 26 : 14);
       tooltip.classList.add("visible");
+      const linkHtml = d.url
+        ? `<a class="tt-link" href="${d.url}" target="_blank" rel="noopener">📄 Open paper ↗</a>`
+        : `<span class="tt-link tt-link-disabled">📄 Preprint (ours)</span>`;
       tooltip.innerHTML = `
         <span class="tt-title">${d.title}</span>
         <span class="tt-meta">${familyLabel[d.family]} · ${d.venue} · ${d.year}</span>
         <div class="tt-desc">${d.desc}</div>
+        ${linkHtml}
       `;
     })
     .on("mousemove", function (e) {
@@ -277,9 +312,26 @@
       tooltip.style.top = py + "px";
     })
     .on("mouseleave", function (e, d) {
-      d3.select(this).select("circle").transition().duration(120).attr("r", d.id === "factorwam" ? 22 : 11);
-      tooltip.classList.remove("visible");
+      // delay hide so user can click the link in the tooltip
+      setTimeout(() => {
+        if (!tooltip.matches(":hover")) {
+          d3.select(this).select("circle").transition().duration(120).attr("r", d.id === "factorwam" ? 22 : 11);
+          tooltip.classList.remove("visible");
+        }
+      }, 300);
     });
+
+  // keep tooltip visible while hovering it (so user can click the link)
+  tooltip.addEventListener("mouseleave", () => {
+    tooltip.classList.remove("visible");
+  });
+
+  // double-click node → open arXiv directly
+  nodeG.on("dblclick", function (e, d) {
+    if (d.url) {
+      window.open(d.url, "_blank", "noopener");
+    }
+  });
 
   // tick
   sim.on("tick", () => {

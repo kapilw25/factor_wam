@@ -40,5 +40,75 @@ document.addEventListener("DOMContentLoaded", () => {
         /* mermaid auto-init handles this; ignore */
       }
     }
-  }, 200);
+
+    // --- Diagram lightbox: click to full-view ---
+    // Create lightbox overlay (once)
+    const overlay = document.createElement("div");
+    overlay.id = "diagram-lightbox";
+    overlay.innerHTML = `
+      <div class="lightbox-content">
+        <div class="lightbox-header">
+          <span class="lightbox-title"></span>
+          <button class="lightbox-close">&times;</button>
+        </div>
+        <div class="lightbox-body"></div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const lbTitle = overlay.querySelector(".lightbox-title");
+    const lbBody = overlay.querySelector(".lightbox-body");
+    const lbClose = overlay.querySelector(".lightbox-close");
+
+    // Close on button, overlay click, or Escape
+    function closeLightbox() {
+      overlay.classList.remove("lb-open");
+    }
+    lbClose.addEventListener("click", closeLightbox);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeLightbox();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeLightbox();
+    });
+
+    // Add expand button to every mermaid-card
+    document.querySelectorAll(".mermaid-card").forEach((card) => {
+      // Add expand hint to header
+      const head = card.querySelector(".mermaid-card-head");
+      if (head && !head.querySelector(".expand-btn")) {
+        const btn = document.createElement("button");
+        btn.className = "expand-btn";
+        btn.textContent = "⛶ expand";
+        btn.title = "Click to full view";
+        head.appendChild(btn);
+      }
+
+      // Make entire card clickable
+      card.style.cursor = "pointer";
+      card.addEventListener("click", (e) => {
+        // Don't trigger if clicking a link inside
+        if (e.target.closest("a")) return;
+
+        const mermaidDiv = card.querySelector(".mermaid");
+        const svg = mermaidDiv ? mermaidDiv.querySelector("svg") : null;
+        const label = card.querySelector(".card-label");
+
+        lbTitle.textContent = label ? label.textContent : "Diagram";
+        lbBody.innerHTML = "";
+
+        if (svg) {
+          const clone = svg.cloneNode(true);
+          clone.style.width = "100%";
+          clone.style.height = "auto";
+          clone.style.maxHeight = "80vh";
+          lbBody.appendChild(clone);
+        } else if (mermaidDiv) {
+          lbBody.innerHTML = "<p style='color:var(--paper-faint);'>Diagram not yet rendered.</p>";
+        }
+
+        overlay.classList.add("lb-open");
+      });
+    });
+  }, 600);
 });
